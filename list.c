@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
+#define EPSILON 0.2
 
 typedef struct node
 {
@@ -31,6 +31,13 @@ typedef struct csArg
 	int mark;
 	int flag;
 }cs_arg;
+
+typedef struct return_tryFlag
+{
+	node_lf * node;
+	int result;
+}return_tf;
+
 node_lf cs (node_lf * address, cs_arg *old_val, cs_arg *new_val )
 {
 	node_lf value = *address;
@@ -66,31 +73,25 @@ return_sf * SearchFrom(int k,node_lf * curr)
 {
 	return_sf *s = malloc(sizeof(return_sf));
 	node_lf * next = curr->next;
-	if(curr->next != NULL)
+	while(next->data <= k)
 	{
-		while(next->data <= k)
+		while(next->mark == 1 && (curr->mark == 0 || curr->next != next))
 		{
-			while(next->mark == 1 && (curr->mark == 0 || curr->next != next))
+			if(curr->next == next)
 			{
-				if(curr->next == next)
-				{
-					HelpMarked(curr,next);
-				}
-				next = curr->next;
+				HelpMarked(curr,next);
 			}
-			if(next->data <= k)
-			{
-				curr = next;
-				next = curr->next;
-			}
+			next = curr->next;
 		}
-		s->current = curr;
-		s->next = next;
+		if(next->data <= k)
+		{
+			curr = next;
+			next = curr->next;
+		}
+
 	}
-	else
-	{
-		s->current = curr;
-	}
+	s->current = curr;
+	s->next = next;
 	return s;
 }
 
@@ -102,7 +103,7 @@ void TryMark(node_lf * del_node)
 	{
 		next = del_node->next;
 		cs_arg * ne = constructArgs(next,0,0);
-		cs_arg * ne1 = constructArgs(next,0,1);
+		cs_arg * ne1 = constructArgs(next,1,0);
 		result = cs(del_node,ne,ne1);
 		if(result.mark == 0 && result.flag == 1)
 			HelpFlagged(del_node,result.next);
@@ -146,22 +147,19 @@ int insert(int k, node_lf * head)
 			cs_arg * ne = constructArgs(next,0,0);
 			cs_arg * new = constructArgs(newNode,0,0);
 			node_lf result = cs(prev,ne,new);
-			if(next != NULL)
+
+			if(result.next == next)// || next == NULL)
 			{
-				if(result.next == next->next || next == NULL)
-				{
-					return 0;
-				}
-				else
-				{
-					if(result.flag == 1)
-						HelpFlagged(prev,result.next);
-					while(prev->mark == 1)
-						prev = prev->backlink;
-				}
+				return 0;
 			}
 			else
-				return 0;
+			{
+				if(result.flag == 1)
+					HelpFlagged(prev,result.next);
+				while(prev->mark == 1)
+					prev = prev->backlink;
+			}
+
 		}
 		s = SearchFrom(k,prev);
 		if(s->current->data == k)
@@ -173,36 +171,96 @@ int insert(int k, node_lf * head)
 	//return 0;
 }
 
+return_tf * TryFlag(node_lf * prev, node_lf * target)
+{
+	return_tf * r = malloc(sizeof(return_tf));
+	while(1)
+	{
+		if(prev->next == target && prev->mark == 0 && prev->flag == 1) // Already Flagged. Some other process would delete it.
+		{
+			r->node = prev;
+			r->result = 0;
+			return r;
+		}
+		cs_arg * ne = constructArgs(target,0,0);
+		cs_arg * ne1 = constructArgs(target,0,1);
+		node_lf result = cs(prev, ne, ne1);
+		if(result.next == target && result.mark == 0 && result.flag == 0)
+		{
+			r->node = prev;
+			r->result = 1;
+			return r;
+		}
+		if(result.next == target && result.mark == 0 && result.flag == 1)
+		{
+			r->node = prev;
+			r->result = 0;
+			return r;
+		}
+		while(prev->mark == 1)
+			prev = prev->backlink;
+	}
+	return_sf * s = SearchFrom(target->data - EPSILON,  prev);
+	if(s->next != target)
+	{
+		r->node = NULL;
+		r->result = 0;
+		return r;
+	}
+}
+
+int delete(int k, node_lf * head)
+{
+	return_sf * s = SearchFrom(k - EPSILON,head);
+	node_lf * prev = s->current;
+	node_lf * del = s->next;
+	if(del->data != k)
+		return -1;
+	return_tf * tf = TryFlag(prev, del);
+	prev = tf->node;
+	if(prev != NULL)
+		HelpFlagged(prev, del);
+	if(tf->result == 0)
+		return -1;
+	return 1;
+}
+
 node_lf * init_LF_list()
 {
 	node_lf * head = malloc(sizeof(node_lf));
-	head->next = NULL;
+	node_lf * tail = malloc(sizeof(node_lf));
+	head->next = tail;
 	head->mark = 0;
 	head->flag = 0;
-	head->data = 10000;
+	head->data = -10000;
+	tail->next = NULL;
+	tail->mark = 0;
+	tail->flag = 0;
+	tail->data = 10000;
 	return head;
 }
 
 void printlist(node_lf * head)
 {
 	head = head->next;
-	//printf("Hi OutSide");
-	do
+	while(head->data != 10000)
 	{
 		printf("\t%d",head->data);
-		//printf("Hi");
 		head = head->next;
-	}while(head != NULL);
+	}
 }
 
 int main()
 {
 	node_lf * head = init_LF_list();
 	insert(1,head);
-	printlist(head);
+	//printlist(head);
 	insert(2,head);
 	insert(3,head);
 	insert(4,head);
+	printlist(head);
+	printf("\n");
+	delete(1,head);
 	printlist(head);
 	return 0;
 }
