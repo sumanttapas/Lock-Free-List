@@ -31,8 +31,7 @@ int SearchFrom(int k,struct Node* curr_node)
 {
 
     struct Node* next_node;
-    struct Search* nod1;        //why malloc?
-    //nod1 = malloc()
+    struct Search* nod1;        
     next_node = curr_node->right;
     while(next_node->key <= k)
     {
