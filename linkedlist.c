@@ -42,8 +42,8 @@ typedef struct return_tryFlag
 static inline node_lf cs(node_lf * address, cs_arg *old_val, cs_arg *new_val)
 {
   node_lf value = *address;
-  __asm__ __volatile__("lock; cmpxchg16b %0; setz %1;":"=m"(*(volatile node_lf *)address),
-		       "=q"(value)
+  __asm__ __volatile__("lock; cmpxchg16b %0; ":"=m"(*(volatile node_lf *)address),
+		       "=q"(value.next)
 		       :"m"(*(volatile node_lf *)address), "a"(old_val->mark), "d"(old_val->flag),
 			"b"(new_val->mark), "c"(new_val->flag)
 		       :"memory");
