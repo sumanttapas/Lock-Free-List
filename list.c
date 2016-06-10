@@ -7,8 +7,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+//#include <stdatomic.h>
 
 #define EPSILON 0.2
+#define LOCK_PREFIX "lock ; "
+
 
 typedef struct node
 {
@@ -29,7 +32,7 @@ typedef struct csArg
 {
 	node_lf * node;
 	int mark;
-	int flag;
+	//int flag;
 }cs_arg;
 
 typedef struct return_tryFlag
@@ -38,7 +41,35 @@ typedef struct return_tryFlag
 	int result;
 }return_tf;
 
-node_lf cs (node_lf * address, cs_arg *old_val, cs_arg *new_val )
+void HelpFlagged(node_lf * prev, node_lf * del_node);
+
+static inline cs_arg cs(cs_arg * address, cs_arg *old_val, cs_arg *new_val)
+{
+	cs_arg value = *address;
+	__asm__ __volatile__("lock; cmpxchg8b %0; "
+				:"=m"(*address),"=q"(value)
+			    :"m"(*address), "a"(old_val->mark), "d"(old_val->node),"b"(new_val->mark), "c"(new_val->node)
+			    :"memory");
+	return value;
+}
+/*static inline node_lf cs(node_lf * address, cs_arg *old_val, cs_arg *new_val)
+{
+	node_lf value;
+	//int ret =5,old = 5,new =5;
+	int  ptr;
+	/*__asm__ __volatile__("addl %0 %1"
+			:"=q"(value)
+			:"a"(address), "b"(old_val->node));*/
+	//ptr = __sync_val_compare_and_swap ((int *)address, old_val->node, new_val->node);
+	 /*__asm__ __volatile__(LOCK_PREFIX "cmpxchgw %1,%2"
+	                 : "=a"(value)
+	                 : "q"(new), "m"(*address), "0"(old)
+	                 : "memory");*/
+	//value = (node_lf )ptr;
+	/*return value;
+}*/
+
+/*node_lf cs (node_lf * address, cs_arg *old_val, cs_arg *new_val )
 {
 	node_lf value = *address;
 	if (value.next == old_val->node && value.mark == old_val->mark && value.flag == old_val->flag)
@@ -48,14 +79,15 @@ node_lf cs (node_lf * address, cs_arg *old_val, cs_arg *new_val )
 		address->flag = new_val->flag;
 	}
 	return value;
-}
-void HelpFlagged(node_lf * prev, node_lf * del_node);
+}*/
+
+
 cs_arg * constructArgs(node_lf * node, int mark, int flag)
 {
 	cs_arg * args = malloc(sizeof(cs_arg));
 	args->node=node;
 	args->mark = mark;
-	args->flag = flag;
+	//args->flag = flag;
 	return args;
 }
 
@@ -64,7 +96,8 @@ void HelpMarked(node_lf * prev, node_lf * del_node)
 	node_lf * next = del_node->next;
 	cs_arg * del = constructArgs(del_node,0,1);
 	cs_arg * ne = constructArgs(next,0,0);
-	cs(prev, del, ne);
+	cs_arg * prev1 = constructArgs(prev->next,prev->mark,prev->flag);
+	cs(prev1, del, ne);
 	free(del_node);
 
 }
@@ -98,15 +131,16 @@ return_sf * SearchFrom(int k,node_lf * curr)
 void TryMark(node_lf * del_node)
 {
 	node_lf * next;
-	node_lf result;
+	cs_arg result;
 	do
 	{
 		next = del_node->next;
 		cs_arg * ne = constructArgs(next,0,0);
 		cs_arg * ne1 = constructArgs(next,1,0);
-		result = cs(del_node,ne,ne1);
-		if(result.mark == 0 && result.flag == 1)
-			HelpFlagged(del_node,result.next);
+		cs_arg * prev1 = constructArgs(del_node->next,del_node->mark,del_node->flag);
+		result = cs(prev1,ne,ne1);
+		if(result.mark == 0)// && result.flag == 1)
+			HelpFlagged(del_node,result.node);
 	}while(del_node->mark != 1);
 }
 
@@ -146,16 +180,17 @@ int insert(int k, node_lf * head)
 			newNode->flag = 0;
 			cs_arg * ne = constructArgs(next,0,0);
 			cs_arg * new = constructArgs(newNode,0,0);
-			node_lf result = cs(prev,ne,new);
+			cs_arg * prev1 = constructArgs(prev->next,prev->mark,prev->flag);
+			cs_arg result = cs(prev1,ne,new);
 
-			if(result.next == next)// || next == NULL)
+			if(result.node == next)// || next == NULL)
 			{
 				return 0;
 			}
 			else
 			{
-				if(result.flag == 1)
-					HelpFlagged(prev,result.next);
+				/*if(result.flag == 1)
+					HelpFlagged(prev,result.next);*/
 				while(prev->mark == 1)
 					prev = prev->backlink;
 			}
@@ -184,14 +219,15 @@ return_tf * TryFlag(node_lf * prev, node_lf * target)
 		}
 		cs_arg * ne = constructArgs(target,0,0);
 		cs_arg * ne1 = constructArgs(target,0,1);
-		node_lf result = cs(prev, ne, ne1);
-		if(result.next == target && result.mark == 0 && result.flag == 0)
+		cs_arg * prev1 = constructArgs(prev->next,prev->mark,prev->flag);
+		cs_arg result = cs(prev1, ne, ne1);
+		if(result.node == target && result.mark == 0)// && result.flag == 0)
 		{
 			r->node = prev;
 			r->result = 1;
 			return r;
 		}
-		if(result.next == target && result.mark == 0 && result.flag == 1)
+		if(result.node == target && result.mark == 0)// && result.flag == 1)
 		{
 			r->node = prev;
 			r->result = 0;
