@@ -80,33 +80,30 @@ node_lf * getNodeAddress(node_lf * p)
 	return (node_lf * )((uintptr_t)p & 0xFFFFFFFC);
 }
 
-/*static inline cs_arg cs(cs_arg * address, cs_arg *old_val, cs_arg *new_val)
+static inline node_lf* cs(cs_arg * address, cs_arg *old_val, cs_arg *new_val)
 {
-	cs_arg value = *address;
-	__asm__ __volatile__("lock; cmpxchg8b %0; "
-				:"=m"(*address),"=q"(value)
-			    :"m"(*address), "a"(old_val->mark), "d"(old_val->node),"b"(new_val->mark), "c"(new_val->node)
+	node_lf * value;// = (address->node)->next;
+	__asm__ __volatile__("lock cmpxchg8b %0; "
+				:"=q"(value)
+			    :"m"(address->node->next), "b"(old_val->node), "c"(new_val->node)
 			    :"memory");
 	return value;
-}*/
+}
 /*static inline node_lf cs(node_lf * address, cs_arg *old_val, cs_arg *new_val)
 {
 	node_lf value;
 	//int ret =5,old = 5,new =5;
 	int  ptr;
-	/*__asm__ __volatile__("addl %0 %1"
-			:"=q"(value)
-			:"a"(address), "b"(old_val->node));*/
-	//ptr = __sync_val_compare_and_swap ((int *)address, old_val->node, new_val->node);
-	 /*__asm__ __volatile__(LOCK_PREFIX "cmpxchgw %1,%2"
+
+	 __asm__ __volatile__(LOCK_PREFIX "cmpxchgw %1,%2"
 	                 : "=a"(value)
 	                 : "q"(new), "m"(*address), "0"(old)
-	                 : "memory");*/
+	                 : "memory");
 	//value = (node_lf )ptr;
-	/*return value;
+	return value;
 }*/
 
-node_lf *cs (cs_arg * address, cs_arg *old_val, cs_arg *new_val )
+/*node_lf *cs (cs_arg * address, cs_arg *old_val, cs_arg *new_val )
 {
 	node_lf *value = (address->node)->next;
 	if ((address->node->next) == old_val->node)
@@ -114,7 +111,7 @@ node_lf *cs (cs_arg * address, cs_arg *old_val, cs_arg *new_val )
 		(address->node)->next = new_val->node;
 	}
 	return value;
-}
+}*/
 
 
 cs_arg * constructArgs(node_lf * node, int mark, int flag)
@@ -277,7 +274,7 @@ return_tf * TryFlag(node_lf * prev, node_lf * target)
 		return r;
 	}
 }
-
+*/
 int delete(int k, node_lf * head)
 {
 	return_sf * s = SearchFrom(k - EPSILON,head);
@@ -292,7 +289,7 @@ int delete(int k, node_lf * head)
 	if(tf->result == 0)
 		return -1;
 	return 1;
-}*/
+}
 
 node_lf * init_LF_list()
 {
