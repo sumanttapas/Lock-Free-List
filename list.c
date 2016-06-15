@@ -82,11 +82,11 @@ node_lf * getNodeAddress(node_lf * p)
 
 static inline node_lf* cs(cs_arg * address, cs_arg *old_val, cs_arg *new_val)
 {
-	node_lf * value;// = (address->node)->next;
-	__asm__ __volatile__("lock cmpxchg8b %0; "
+	node_lf * value;
+	__asm__ __volatile__("lock cmpxchg8b %1; "
 				:"=q"(value)
-			    :"m"(address->node->next), "b"(old_val->node), "c"(new_val->node)
-			    :"memory");
+				:"m"(address->node->next), "a"(old_val->node), "c"(new_val->node)
+				:"memory");
 	return value;
 }
 /*static inline node_lf cs(node_lf * address, cs_arg *old_val, cs_arg *new_val)
@@ -95,7 +95,7 @@ static inline node_lf* cs(cs_arg * address, cs_arg *old_val, cs_arg *new_val)
 	//int ret =5,old = 5,new =5;
 	int  ptr;
 
-	 __asm__ __volatile__(LOCK_PREFIX "cmpxchgw %1,%2"
+	 __asm__ __volatiljunk `4(%ecx)' after registere__(LOCK_PREFIX "cmpxchgw %1,%2"
 	                 : "=a"(value)
 	                 : "q"(new), "m"(*address), "0"(old)
 	                 : "memory");
@@ -275,7 +275,7 @@ return_tf * TryFlag(node_lf * prev, node_lf * target)
 	}
 }
 */
-int delete(int k, node_lf * head)
+/*int delete(int k, node_lf * head)
 {
 	return_sf * s = SearchFrom(k - EPSILON,head);
 	node_lf * prev = s->current;
@@ -289,7 +289,7 @@ int delete(int k, node_lf * head)
 	if(tf->result == 0)
 		return -1;
 	return 1;
-}
+}*/
 
 node_lf * init_LF_list()
 {
@@ -324,7 +324,7 @@ int main()
 	printlist(head);
 	printf("\n");
 	//delete(1,head);
-	//printlist(head);*/
+	//printlist(head);
 	return 0;
 }
 
