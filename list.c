@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <pthread.h>
 //#include <stdatomic.h>
 
 #define EPSILON 0.2
@@ -171,7 +172,6 @@ void TryMark(node_lf * del_node)
 {
 	node_lf * next;
 	node_lf * result;
-	int k;
 	do
 	{
 		next = getNodeAddress(del_node)->next;
@@ -184,14 +184,13 @@ void TryMark(node_lf * del_node)
 
 		if(getMark(result) == 0 && getFlag(result) == 1)
 			HelpFlagged(del_node,result);
-		k = getMark(del_node->next);
-	}while(getMark(del_node->next) != 1);
+	}while(getMark(getNodeAddress(del_node)->next) != 1);
 }
 
 void HelpFlagged(node_lf * prev, node_lf * del_node)
 {
 	getNodeAddress(del_node)->backlink = prev;
-	if(getMark(del_node) == 0)
+	if(getMark(getNodeAddress(del_node)->next) == 0)
 		TryMark(del_node);
 	HelpMarked(prev,del_node);
 }
@@ -253,7 +252,7 @@ return_tf * TryFlag(node_lf * prev, node_lf * target)
 	return_tf * r = malloc(sizeof(return_tf));
 	while(1)
 	{
-		if(getNodeAddress(prev)->next == target && getMark(prev) == 0 && getFlag(prev) == 1) // Already Flagged. Some other process would delete it.
+		if(getNodeAddress(prev)->next == target && getMark(getNodeAddress(prev)->next) == 0 && getFlag(getNodeAddress(prev)->next) == 1) // Already Flagged. Some other process would delete it.
 		{
 			r->node = prev;
 			r->result = 0;
@@ -276,10 +275,10 @@ return_tf * TryFlag(node_lf * prev, node_lf * target)
 			r->result = 0;
 			return r;
 		}
-		while(getMark(prev) == 1)
+		while(getMark(getNodeAddress(prev)->next) == 1)
 			prev = getNodeAddress(prev)->backlink;
 	}
-	return_sf * s = SearchFrom(target->data - EPSILON,  prev);
+	return_sf * s = SearchFrom((getNodeAddress(target)->data) - EPSILON,  prev);
 	if(s->next != target)
 	{
 		r->node = NULL;
@@ -324,21 +323,43 @@ void printlist(node_lf * head)
 		head = head->next;
 	}
 }
-
+void *thread1(void *);
+void *thread2(void *);
 int main()
 {
 	node_lf * head = init_LF_list();
+	insert(12,head);
+	insert(14,head);
+	insert(22,head);
+	insert(24,head);
 	//return_sf * s = SearchFrom(1,head);
-	insert(1,head);
+	pthread_t t1,t2;
+	pthread_create (&t2, NULL, thread2, (void *)head);
+	pthread_create (&t1, NULL, thread1, (void *)head);
+	pthread_join (t1, NULL);
+	pthread_join (t2, NULL);
+	printlist(head);
+	/*insert(1,head);
 	//printlist(head);
 	insert(2,head);
 	insert(3,head);
 	insert(4,head);
 	printlist(head);
 	printf("\n");
-	delete(1,head);
-	printlist(head);
+	delete(1,head);*/
+	//printlist(head);
 	return 0;
 }
 
+void * thread1(void * args)
+{
+	node_lf * head = args;
+	delete(12,head);
+}
 
+void * thread2(void * args)
+{
+	node_lf * head = args;
+	delete(12,head);
+	delete(24,head);
+}
