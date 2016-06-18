@@ -29,7 +29,7 @@ typedef struct searchfrom
 
 typedef struct csArg
 {
-	node_lf * node;
+	int * node;
 }cs_arg;
 
 typedef struct return_tryFlag
@@ -67,7 +67,11 @@ node_lf * clrAll(node_lf * p)
 
 int getMark(node_lf * p)
 {
-	return (int)((uintptr_t)p & 0x00000002);
+
+	int r = (int)((uintptr_t)p & 0x00000002);
+	if(r == 2)
+		return 1;
+	return r;
 }
 
 int getFlag(node_lf * p)
@@ -80,7 +84,7 @@ node_lf * getNodeAddress(node_lf * p)
 	return (node_lf * )((uintptr_t)p & 0xFFFFFFFC);
 }
 
-static inline node_lf* cs(cs_arg * address, cs_arg *old_val, cs_arg *new_val)
+/*static inline node_lf* cs(cs_arg * address, cs_arg *old_val, cs_arg *new_val)
 {
 	node_lf * value;
 	__asm__ __volatile__("lock cmpxchg8b %1; "
@@ -88,7 +92,7 @@ static inline node_lf* cs(cs_arg * address, cs_arg *old_val, cs_arg *new_val)
 				:"m"(address->node->next), "a"(old_val->node), "c"(new_val->node)
 				:"memory");
 	return value;
-}
+}*/
 /*static inline node_lf cs(node_lf * address, cs_arg *old_val, cs_arg *new_val)
 {
 	node_lf value;
@@ -102,37 +106,38 @@ static inline node_lf* cs(cs_arg * address, cs_arg *old_val, cs_arg *new_val)
 	//value = (node_lf )ptr;
 	return value;
 }*/
-
-/*node_lf *cs (cs_arg * address, cs_arg *old_val, cs_arg *new_val )
+/*
+node_lf *cs (cs_arg * address, cs_arg *old_val, cs_arg *new_val )
 {
-	node_lf *value = (address->node)->next;
-	if ((address->node->next) == old_val->node)
+	node_lf *value;// = (address->node)->next;
+	/*if ((address->node->next) == old_val->node)
 	{
 		(address->node)->next = new_val->node;
 	}
 	return value;
-}*/
+}
 
-
-cs_arg * constructArgs(node_lf * node, int mark, int flag)
+*/
+node_lf * constructArgs(node_lf * node, int mark, int flag)
 {
-	cs_arg * args = malloc(sizeof(cs_arg));
-	args->node=getNodeAddress(node);
+	node_lf * temp = getNodeAddress(node);
 	if(mark == 1)
-		args->node = setMark(args->node);
+		(temp) = setMark(temp);
 	if(flag == 1)
-		args->node = setFlag(args->node);
-	return args;
+		(temp) = setFlag(temp);
+	return temp;
 }
 
 void HelpMarked(node_lf * prev, node_lf * del_node)
 {
 	node_lf * next = getNodeAddress(del_node)->next;
-	cs_arg * del = constructArgs(del_node,0,1);
-	cs_arg * ne = constructArgs(next,0,0);
-	cs_arg * prev1 = constructArgs(prev->next,getMark(prev),getFlag(prev));
-	cs(prev1, del, ne);
-	free(del_node);
+
+	node_lf * del = constructArgs(del_node,0,1);
+	node_lf * next_node = constructArgs(next,0,0);
+
+	__sync_val_compare_and_swap ((unsigned int *)&(getNodeAddress(prev)->next), (unsigned int)del, (unsigned int)next_node);
+
+	free(getNodeAddress(del_node));
 
 }
 
@@ -166,16 +171,21 @@ void TryMark(node_lf * del_node)
 {
 	node_lf * next;
 	node_lf * result;
+	int k;
 	do
 	{
 		next = getNodeAddress(del_node)->next;
-		cs_arg * ne = constructArgs(next,0,0);
-		cs_arg * ne1 = constructArgs(next,1,0);
-		cs_arg * prev1 = constructArgs(getNodeAddress(del_node)->next,getMark(del_node),getFlag(del_node));
-		result = cs(prev1,ne,ne1);
+
+		node_lf * next_node = constructArgs(next,0,0);
+		node_lf * next_node1 = constructArgs(next,1,0);
+
+		result = (node_lf *)__sync_val_compare_and_swap((unsigned int *)&(getNodeAddress(del_node)->next),
+														(unsigned int)(next_node),(unsigned int)(next_node1));
+
 		if(getMark(result) == 0 && getFlag(result) == 1)
 			HelpFlagged(del_node,result);
-	}while(getMark(del_node) != 1);
+		k = getMark(del_node->next);
+	}while(getMark(del_node->next) != 1);
 }
 
 void HelpFlagged(node_lf * prev, node_lf * del_node)
@@ -208,10 +218,12 @@ int insert(int k, node_lf * head)
 		else
 		{
 			newNode->next = next;
-			cs_arg * ne = constructArgs(next,0,0);
-			cs_arg * new = constructArgs(newNode,0,0);
-			cs_arg * prev1 = constructArgs(getNodeAddress(prev),getMark(prev),getFlag(prev));
-			node_lf * result = cs(prev1,ne,new);
+
+			node_lf * next_node = constructArgs(next,0,0);
+			node_lf * new_Node = constructArgs(newNode,0,0);
+
+			node_lf * result = (node_lf *)__sync_val_compare_and_swap((unsigned int *)&(getNodeAddress(prev)->next),
+																		(unsigned int)(next_node),(unsigned int)(new_Node));
 
 			if(result == next)// || next == NULL)
 			{
@@ -235,36 +247,37 @@ int insert(int k, node_lf * head)
 	}
 	//return 0;
 }
-/*
+
 return_tf * TryFlag(node_lf * prev, node_lf * target)
 {
 	return_tf * r = malloc(sizeof(return_tf));
 	while(1)
 	{
-		if(prev->next == target && prev->mark == 0 && prev->flag == 1) // Already Flagged. Some other process would delete it.
+		if(getNodeAddress(prev)->next == target && getMark(prev) == 0 && getFlag(prev) == 1) // Already Flagged. Some other process would delete it.
 		{
 			r->node = prev;
 			r->result = 0;
 			return r;
 		}
-		cs_arg * ne = constructArgs(target,0,0);
-		cs_arg * ne1 = constructArgs(target,0,1);
-		cs_arg * prev1 = constructArgs(prev->next,prev->mark,prev->flag);
-		cs_arg result = cs(prev1, ne, ne1);
-		if(result.node == target && result.mark == 0)// && result.flag == 0)
+		node_lf * target_node = constructArgs(target,0,0);
+		node_lf * target_node_new = constructArgs(target,0,1);
+
+		node_lf * result = (node_lf *)__sync_val_compare_and_swap((unsigned int *)&(getNodeAddress(prev)->next),
+																	(unsigned int)(target_node),(unsigned int)(target_node_new));
+		if(result == target && getMark(result) == 0 && getFlag(result) == 0)
 		{
 			r->node = prev;
 			r->result = 1;
 			return r;
 		}
-		if(result.node == target && result.mark == 0)// && result.flag == 1)
+		if(result == target && getMark(result) == 0 && getFlag(result) == 1)
 		{
 			r->node = prev;
 			r->result = 0;
 			return r;
 		}
-		while(prev->mark == 1)
-			prev = prev->backlink;
+		while(getMark(prev) == 1)
+			prev = getNodeAddress(prev)->backlink;
 	}
 	return_sf * s = SearchFrom(target->data - EPSILON,  prev);
 	if(s->next != target)
@@ -274,13 +287,13 @@ return_tf * TryFlag(node_lf * prev, node_lf * target)
 		return r;
 	}
 }
-*/
-/*int delete(int k, node_lf * head)
+
+int delete(int k, node_lf * head)
 {
 	return_sf * s = SearchFrom(k - EPSILON,head);
 	node_lf * prev = s->current;
 	node_lf * del = s->next;
-	if(del->data != k)
+	if(getNodeAddress(del)->data != k)
 		return -1;
 	return_tf * tf = TryFlag(prev, del);
 	prev = tf->node;
@@ -289,7 +302,7 @@ return_tf * TryFlag(node_lf * prev, node_lf * target)
 	if(tf->result == 0)
 		return -1;
 	return 1;
-}*/
+}
 
 node_lf * init_LF_list()
 {
@@ -323,8 +336,9 @@ int main()
 	insert(4,head);
 	printlist(head);
 	printf("\n");
-	//delete(1,head);
-	//printlist(head);
+	delete(1,head);
+	printlist(head);
 	return 0;
 }
+
 
