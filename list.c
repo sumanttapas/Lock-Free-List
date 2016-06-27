@@ -1,19 +1,18 @@
 /*
  * list.c
  *
- *  Created on: May 30, 2016
- *      Author: Sumant
+ *  Created on: Jun 26, 2016
+ *      Author: sumant
  */
+
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <pthread.h>
-//#include <stdatomic.h>
+#include <unistd.h>
 
 #define EPSILON 0.2
-#define LOCK_PREFIX "lock ; "
-
 
 typedef struct node
 {
@@ -22,6 +21,16 @@ typedef struct node
 	struct node * backlink;
 }node_lf;
 
+struct list
+{
+	node_lf * head;
+	node_lf * (*init)();
+	int (*insert)(int k,node_lf* head);
+	int (*delete)(int,node_lf *);
+	void (*print)(node_lf *);
+	void (*destructor)(node_lf *);
+};
+typedef struct list * List;
 typedef struct searchfrom
 {
 	node_lf * current;
@@ -85,40 +94,7 @@ node_lf * getNodeAddress(node_lf * p)
 	return (node_lf * )((uintptr_t)p & 0xFFFFFFFC);
 }
 
-/*static inline node_lf* cs(cs_arg * address, cs_arg *old_val, cs_arg *new_val)
-{
-	node_lf * value;
-	__asm__ __volatile__("lock cmpxchg8b %1; "
-				:"=q"(value)
-				:"m"(address->node->next), "a"(old_val->node), "c"(new_val->node)
-				:"memory");
-	return value;
-}*/
-/*static inline node_lf cs(node_lf * address, cs_arg *old_val, cs_arg *new_val)
-{
-	node_lf value;
-	//int ret =5,old = 5,new =5;
-	int  ptr;
 
-	 __asm__ __volatiljunk `4(%ecx)' after registere__(LOCK_PREFIX "cmpxchgw %1,%2"
-	                 : "=a"(value)
-	                 : "q"(new), "m"(*address), "0"(old)
-	                 : "memory");
-	//value = (node_lf )ptr;
-	return value;
-}*/
-/*
-node_lf *cs (cs_arg * address, cs_arg *old_val, cs_arg *new_val )
-{
-	node_lf *value;// = (address->node)->next;
-	/*if ((address->node->next) == old_val->node)
-	{
-		(address->node)->next = new_val->node;
-	}
-	return value;
-}
-
-*/
 node_lf * constructArgs(node_lf * node, int mark, int flag)
 {
 	node_lf * temp = getNodeAddress(node);
@@ -144,7 +120,7 @@ void HelpMarked(node_lf * prev, node_lf * del_node)
 
 return_sf * SearchFrom(int k,node_lf * curr)
 {
-	return_sf *s = malloc(sizeof(return_sf));
+	return_sf *s = (return_sf *)malloc(sizeof(return_sf));
 	node_lf * next = curr->next;
 	while(getNodeAddress(next)->data <= k)
 	{
@@ -195,19 +171,18 @@ void HelpFlagged(node_lf * prev, node_lf * del_node)
 	HelpMarked(prev,del_node);
 }
 
-
-
 int insert(int k, node_lf * head)
 {
 	return_sf * s = SearchFrom(k,head);
 	node_lf * prev;
 	node_lf * next;
-	node_lf * prev_succ = malloc(sizeof(node_lf));
+	node_lf * prev_succ = (node_lf *)malloc(sizeof(node_lf));
 	prev = s->current;
 	next = s->next;
+	free(s);
 	if(getNodeAddress(prev)->data == k)
 		return -1;
-	node_lf * newNode = malloc(sizeof(node_lf));
+	node_lf * newNode = (node_lf *)malloc(sizeof(node_lf));
 	newNode->data = k;
 	while(1)
 	{
@@ -241,15 +216,18 @@ int insert(int k, node_lf * head)
 		if(getNodeAddress(s->current)->data == k)
 		{
 			free(newNode);
+			free(s);
 			return -1;
 		}
 	}
+	free(s);
+	free(prev_succ);
 	//return 0;
 }
 
 return_tf * TryFlag(node_lf * prev, node_lf * target)
 {
-	return_tf * r = malloc(sizeof(return_tf));
+	return_tf * r = (return_tf *)malloc(sizeof(return_tf));
 	while(1)
 	{
 		if(getNodeAddress(prev)->next == target && getMark(getNodeAddress(prev)->next) == 0 && getFlag(getNodeAddress(prev)->next) == 1) // Already Flagged. Some other process would delete it.
@@ -283,15 +261,18 @@ return_tf * TryFlag(node_lf * prev, node_lf * target)
 	{
 		r->node = NULL;
 		r->result = 0;
+		free(s);
 		return r;
 	}
+	free(s);
 }
 
-int delete(int k, node_lf * head)
+int delete_node(int k, node_lf * head)
 {
 	return_sf * s = SearchFrom(k - EPSILON,head);
 	node_lf * prev = s->current;
 	node_lf * del = s->next;
+	free(s);
 	if(getNodeAddress(del)->data != k)
 		return -1;
 	return_tf * tf = TryFlag(prev, del);
@@ -299,14 +280,18 @@ int delete(int k, node_lf * head)
 	if(prev != NULL)
 		HelpFlagged(prev, del);
 	if(tf->result == 0)
+	{
+		free(tf);
 		return -1;
+	}
+	free(tf);
 	return 1;
 }
 
 node_lf * init_LF_list()
 {
-	node_lf * head = malloc(sizeof(node_lf));
-	node_lf * tail = malloc(sizeof(node_lf));
+	node_lf * head = (node_lf *)malloc(sizeof(node_lf));
+	node_lf * tail = (node_lf *)malloc(sizeof(node_lf));
 	head->next = tail;
 	head->data = -10000;
 	tail->next = NULL;
@@ -323,43 +308,67 @@ void printlist(node_lf * head)
 		head = head->next;
 	}
 }
+
+void destroy(node_lf * head)
+{
+	node_lf * next;
+	node_lf * curr = getNodeAddress(head);
+	while(getNodeAddress(curr) != 0)
+	{
+		next = getNodeAddress(curr)->next;
+		free(curr);
+		curr = next;
+	}
+}
+
+List list_init()
+{
+	List temp = (List)malloc(sizeof(struct list));
+	temp->init = init_LF_list;
+	temp->delete = delete_node;
+	temp->insert = insert;
+	temp->print = printlist;
+	temp->destructor = destroy;
+	return temp;
+}
+
 void *thread1(void *);
 void *thread2(void *);
+
 int main()
 {
-	node_lf * head = init_LF_list();
-	insert(12,head);
-	insert(14,head);
-	insert(22,head);
-	insert(24,head);
-	//return_sf * s = SearchFrom(1,head);
+	List mylist = list_init(); //initialize the list object. Can be called as constructor
+	mylist->head = mylist->init(); //initialize the list;
+	mylist->insert(12,mylist->head);
+	mylist->insert(14,mylist->head);
+	mylist->insert(22,mylist->head);
+	mylist->insert(24,mylist->head);
 	pthread_t t1,t2;
-	pthread_create (&t2, NULL, thread2, (void *)head);
-	pthread_create (&t1, NULL, thread1, (void *)head);
+	pthread_create (&t2, NULL, thread2, (void *)mylist);
+	pthread_create (&t1, NULL, thread1, (void *)mylist);
 	pthread_join (t1, NULL);
 	pthread_join (t2, NULL);
-	printlist(head);
-	/*insert(1,head);
-	//printlist(head);
-	insert(2,head);
-	insert(3,head);
-	insert(4,head);
-	printlist(head);
-	printf("\n");
-	delete(1,head);*/
-	//printlist(head);
+	mylist->print(mylist->head);
+	mylist->destructor(mylist->head);
 	return 0;
 }
 
 void * thread1(void * args)
 {
-	node_lf * head = args;
-	delete(12,head);
+	List list = (List)args;
+	sleep(1);
+	list->delete(12,list->head);
+	list->insert(12,list->head);
+	list->insert(16,list->head);
 }
 
 void * thread2(void * args)
 {
-	node_lf * head = args;
-	delete(12,head);
-	delete(24,head);
+	List list = (List)args;
+	sleep(2);
+	list->delete(12,list->head);
+	list->delete(24,list->head);
+	//insert(12,head);
 }
+
+
