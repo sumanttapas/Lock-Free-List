@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <iostream>
 #include "cpucounters.h"
-//#include <stdatomic.h>
 
 #define EPSILON 0.2
 #define LOCK_PREFIX "lock ; "
