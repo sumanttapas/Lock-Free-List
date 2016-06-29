@@ -176,7 +176,7 @@ int insert(int k, node_lf * head)
 	return_sf * s = SearchFrom(k,head);
 	node_lf * prev;
 	node_lf * next;
-	node_lf * prev_succ = (node_lf *)malloc(sizeof(node_lf));
+	node_lf * prev_succ;
 	prev = s->current;
 	next = s->next;
 	free(s);
@@ -186,7 +186,7 @@ int insert(int k, node_lf * head)
 	newNode->data = k;
 	while(1)
 	{
-		prev_succ->next = getNodeAddress(prev)->next;
+		prev_succ = getNodeAddress(prev)->next;
 		if(getFlag(prev_succ) == 1)
 			HelpFlagged(prev,getNodeAddress(prev_succ)->next);
 		else
@@ -221,7 +221,6 @@ int insert(int k, node_lf * head)
 		}
 	}
 	free(s);
-	free(prev_succ);
 	//return 0;
 }
 
@@ -350,13 +349,14 @@ int main()
 	pthread_join (t2, NULL);
 	mylist->print(mylist->head);
 	mylist->destructor(mylist->head);
+	free(mylist);
 	return 0;
 }
 
 void * thread1(void * args)
 {
 	List list = (List)args;
-	sleep(1);
+	//sleep(1);
 	list->delete(12,list->head);
 	list->insert(12,list->head);
 	list->insert(16,list->head);
@@ -365,8 +365,8 @@ void * thread1(void * args)
 void * thread2(void * args)
 {
 	List list = (List)args;
-	sleep(2);
-	list->delete(12,list->head);
+	//sleep(2);
+	list->insert(26,list->head);
 	list->delete(24,list->head);
 	//insert(12,head);
 }
