@@ -33,7 +33,6 @@ void insert(int data,node_t * head)
 	node_t * last = head;
 	pthread_mutex_lock(&mutex);
 	c++;
-
 	while(last->next != NULL)
 	{
 		last = last->next;
@@ -48,7 +47,7 @@ void insert(int data,node_t * head)
 	{
 		node_t * n = malloc(sizeof(struct node));
 		n->data = data;
-		//pthread_mutex_lock(&mutex);
+		//
 		last->next = n;
 		n->next = NULL;
 		//pthread_mutex_unlock(&mutex);
@@ -67,6 +66,32 @@ void printlist(node_t * head)
 	}while(head != NULL);
 }
 
+void deleteElement(node_t *head, int pos)
+{
+	int var;
+	node_t * prev;
+	node_t * node = head;
+	node_t head1 = *head;
+	pthread_mutex_lock(&mutex);
+	for (var = 0; var < pos; ++var)
+	{
+		prev = node;
+		node = node->next;
+	}
+	if(node == head)
+	{
+		node_t * temp = head->next;
+		*head = *temp;
+		free(temp);
+	}
+	else
+	{
+		prev->next = node->next;
+		free(node);
+	}
+	pthread_mutex_unlock(&mutex);
+}
+
 node_t *init_list()
 {
 	node_t * head = malloc(sizeof(node_t));
@@ -74,37 +99,25 @@ node_t *init_list()
 	return head;
 }
 
-/*int main(void)
+int main(void)
 {
 	node_t * head = init_list();
-	/*insert(1,head);
-	if(fork() == 0)
-	{
-		insert(13,head);
-		printf("\n");
-		printlist(head);
-		exit(0);
-	}
-	//wait(NULL);
-	insert(12,head);
-	insert(14,head);
-	printf("\n");
 
 	pthread_t t1,t2;
 	pthread_create (&t2, NULL, thread2, (void *)head);
 	pthread_create (&t1, NULL, thread1, (void *)head);
-
 	pthread_join (t1, NULL);
 	pthread_join (t2, NULL);
 	printlist(head);
 	return 0;
-}*/
+}
 
 void * thread1(void * args)
 {
 	node_t * head = args;
 	insert(12,head);
 	insert(14,head);
+	deleteElement(head,0);
 }
 
 void * thread2(void * args)
@@ -112,5 +125,5 @@ void * thread2(void * args)
 	node_t * head = args;
 	insert(22,head);
 	insert(24,head);
+	deleteElement(head,1);
 }
-
