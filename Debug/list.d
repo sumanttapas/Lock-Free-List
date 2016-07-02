@@ -1,1 +1,0 @@
-list.d: ../list.c
