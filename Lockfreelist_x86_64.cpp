@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include "cpucounters.h"
+#include <time.h>
 
 #define EPSILON 0.2
 #define setMark(address) ((node_lf *)((uintptr_t)address | 2))
@@ -88,9 +89,13 @@ void HelpMarked(node_lf * prev, node_lf * del_node)
 
 	node_lf * del = constructArgs(del_node,0,1);
 	node_lf * next_node = constructArgs(next,0,0);
-
+	//SystemCounterState before_sstate = getSystemCounterState();
 	__sync_val_compare_and_swap ((unsigned long long *)&(getNodeAddress(prev)->next), (unsigned long long)del, (unsigned long long)next_node);
-
+	//SystemCounterState after_sstate = getSystemCounterState();
+	/*std::cout << "\nInstructions per clock:" << getIPC(before_sstate,after_sstate) << std::endl;
+	std::cout << "\nBytes read:" << getBytesReadFromMC(before_sstate,after_sstate);
+	std::cout << "\nL2 Misses:" << getL2CacheMisses(before_sstate,after_sstate);
+	std::cout << "\nL2 HIts:" << getL2CacheHits(before_sstate,after_sstate)<< "\n";*/
 	free(getNodeAddress(del_node));
 
 }
@@ -280,7 +285,7 @@ void printlist(node_lf * head)
 	head = getNodeAddress(head)->next;
 	while(getNodeAddress(head)->data != 10000)
 	{
-		printf("\t%d",getNodeAddress(head)->data);
+		printf("\t%d\n",getNodeAddress(head)->data);
 		head = head->next;
 	}
 }
@@ -310,7 +315,24 @@ List list_init()
 
 void *thread1(void *);
 void *thread2(void *);
-
+void *thread3(void *);
+void *thread4(void *);
+void *thread5(void *);
+void *thread6(void *);
+void *thread7(void *);
+void *thread8(void *);
+void *thread9(void *);
+void *thread10(void *);
+void *thread11(void *);
+void *thread12(void *);
+void *thread13(void *);
+void *thread14(void *);
+void *thread15(void *);
+void *thread16(void *);
+void *thread17(void *);
+void *thread18(void *);
+void *thread19(void *);
+void *thread20(void *);
 int main()
 {
 	PCM * m = PCM::getInstance();
@@ -321,7 +343,8 @@ int main()
 	  exit(1);
 	}
 
-	SystemCounterState before_sstate = getSystemCounterState();	
+	SystemCounterState before_sstate = getSystemCounterState();
+	clock_t begin = clock();	
 
 	List mylist = list_init(); //initialize the list object. Can be called as constructor
 	mylist->head = mylist->init(); //initialize the list;
@@ -329,22 +352,67 @@ int main()
 	mylist->insert(14,mylist->head);
 	mylist->insert(22,mylist->head);
 	mylist->insert(24,mylist->head);
-	pthread_t t1,t2;
+	pthread_t t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20;
 	pthread_create (&t2, NULL, thread2, (void *)mylist);
 	pthread_create (&t1, NULL, thread1, (void *)mylist);
+	pthread_create (&t3, NULL, thread3, (void *)mylist);
+	pthread_create (&t4, NULL, thread4, (void *)mylist);
+	pthread_create (&t5, NULL, thread5, (void *)mylist);
+	pthread_create (&t6, NULL, thread6, (void *)mylist);
+	pthread_create (&t7, NULL, thread7, (void *)mylist);
+	pthread_create (&t8, NULL, thread8, (void *)mylist);
+	pthread_create (&t9, NULL, thread9, (void *)mylist);
+	pthread_create (&t10, NULL, thread10, (void *)mylist);
+	pthread_create (&t11, NULL, thread11, (void *)mylist);
+	pthread_create (&t12, NULL, thread12, (void *)mylist);
+	pthread_create (&t13, NULL, thread13, (void *)mylist);
+	pthread_create (&t14, NULL, thread14, (void *)mylist);
+	pthread_create (&t15, NULL, thread15, (void *)mylist);
+	pthread_create (&t16, NULL, thread16, (void *)mylist);
+	pthread_create (&t17, NULL, thread17, (void *)mylist);
+	pthread_create (&t18, NULL, thread18, (void *)mylist);
+	pthread_create (&t19, NULL, thread19, (void *)mylist);
+	pthread_create (&t20, NULL, thread20, (void *)mylist);
 	pthread_join (t1, NULL);
 	pthread_join (t2, NULL);
-	mylist->print(mylist->head);
-	mylist->destructor(mylist->head);
-	free(mylist);
+	pthread_join (t3, NULL);
+	pthread_join (t4, NULL);
+	pthread_join (t5, NULL);
+	pthread_join (t6, NULL);
+	pthread_join (t7, NULL);
+	pthread_join (t8, NULL);
+	pthread_join (t9, NULL);
+	pthread_join (t10, NULL);
+	pthread_join (t11, NULL);
+	pthread_join (t12, NULL);
+	pthread_join (t13, NULL);
+	pthread_join (t14, NULL);
+	pthread_join (t15, NULL);
+	pthread_join (t16, NULL);
+	pthread_join (t17, NULL);
+	pthread_join (t18, NULL);
+	pthread_join (t19, NULL);
+	pthread_join (t20, NULL);
+	//mylist->print(mylist->head);
+	//mylist->destructor(mylist->head);
+	//free(mylist);
+	clock_t end = clock();
+	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
 	SystemCounterState after_sstate = getSystemCounterState();
-
+	
+	std::cout << "\nTime:" << time_spent << std::endl;
 	std::cout << "\nInstructions per clock:" << getIPC(before_sstate,after_sstate) << std::endl;
-	std::cout << "\nBytes read:" << getBytesReadFromMC(before_sstate,after_sstate);
-
-	std::cout << "\nL2 Misses:" << getL2CacheMisses(before_sstate,after_sstate);
-	std::cout << "\nL2 HIts:" << getL2CacheHits(before_sstate,after_sstate)<< "\n";
+	std::cout << "Bytes read:" << getBytesReadFromMC(before_sstate,after_sstate) << std::endl;
+	std::cout << "Bytes Written:" << getBytesWrittenToMC(before_sstate,after_sstate) << std::endl;
+	std::cout << "L2 Misses:" << getL2CacheMisses(before_sstate,after_sstate)<< std::endl;
+	std::cout << "L2 HIts:" << getL2CacheHits(before_sstate,after_sstate)<< std::endl;
+	std::cout << "L3 Misses:" << getL3CacheMisses(before_sstate,after_sstate)<< std::endl;
+	std::cout << "L3 HIts:" << getL3CacheHits(before_sstate,after_sstate)<< std::endl;
+	std::cout << "Cycles:" << getCycles(before_sstate,after_sstate)<<std::endl;
+	std::cout << "Cycles Lost Due L3 Cache Misses:" << getCyclesLostDueL3CacheMisses(before_sstate,after_sstate)<<std::endl;
+	std::cout << "Cycles Lost Due L2 Cache Misses:" << getCyclesLostDueL2CacheMisses(before_sstate,after_sstate)<<std::endl;
+	mylist->print(mylist->head);
 	return 0;
 }
 
@@ -352,16 +420,198 @@ void * thread1(void * args)
 {
 	List list = (List)args;
 	//sleep(1);
-	list->delete_node(12,list->head);
 	list->insert(12,list->head);
-	list->insert(16,list->head);
+	list->insert(14,list->head);
+	list->insert(53,list->head);
 }
 
 void * thread2(void * args)
 {
 	List list = (List)args;
 	//sleep(2);
-	list->insert(26,list->head);
-	list->delete_node(24,list->head);
+	list->insert(16,list->head);
+	list->insert(18,list->head);
+	list->insert(43,list->head);
+	//list->delete_node(16,list->head);
+	//insert(12,head);
+}
+void * thread3(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(10,list->head);
+	list->insert(8,list->head);
+	list->insert(33,list->head);
+	//list->delete_node(12,list->head);
+	//insert(12,head);
+}
+void * thread4(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(6,list->head);
+	list->insert(4,list->head);
+	list->insert(23,list->head);
+	//list->delete_node(26,list->head);
+	//insert(12,head);
+}
+void * thread5(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(2,list->head);
+	list->insert(0,list->head);
+	list->insert(13,list->head);
+	//list->delete_node(28,list->head);
+	//insert(12,head);
+}
+void * thread6(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(20,list->head);
+	list->insert(22,list->head);
+	list->insert(3,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread7(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(120,list->head);
+	list->insert(122,list->head);
+	list->insert(113,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread8(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(201,list->head);
+	list->insert(221,list->head);
+	list->insert(31,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread9(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(9,list->head);
+	list->insert(19,list->head);
+	list->insert(29,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread10(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(39,list->head);
+	list->insert(49,list->head);
+	list->insert(59,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread11(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(69,list->head);
+	list->insert(79,list->head);
+	list->insert(89,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread12(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(99,list->head);
+	list->insert(109,list->head);
+	list->insert(119,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread13(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(129,list->head);
+	list->insert(139,list->head);
+	list->insert(149,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread14(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(159,list->head);
+	list->insert(169,list->head);
+	list->insert(179,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread15(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(189,list->head);
+	list->insert(199,list->head);
+	list->insert(209,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread16(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(219,list->head);
+	list->insert(229,list->head);
+	list->insert(239,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread17(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(200,list->head);
+	list->insert(190,list->head);
+	list->insert(180,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread18(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(170,list->head);
+	list->insert(160,list->head);
+	list->insert(150,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread19(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(140,list->head);
+	list->insert(130,list->head);
+	list->insert(135,list->head);
+	//list->delete_node(30,list->head);
+	//insert(12,head);
+}
+void * thread20(void * args)
+{
+	List list = (List)args;
+	//sleep(2);
+	list->insert(145,list->head);
+	list->insert(155,list->head);
+	list->insert(165,list->head);
+	//list->delete_node(30,list->head);
 	//insert(12,head);
 }
