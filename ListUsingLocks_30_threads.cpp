@@ -35,7 +35,16 @@ void *thread17(void *);
 void *thread18(void *);
 void *thread19(void *);
 void *thread20(void *);
-
+void *thread21(void *);
+void *thread22(void *);
+void *thread23(void *);
+void *thread24(void *);
+void *thread25(void *);
+void *thread26(void *);
+void *thread27(void *);
+void *thread28(void *);
+void *thread29(void *);
+void *thread30(void *);
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 void insert(int data,node_t * head)
@@ -136,6 +145,16 @@ int main(void)
 	pthread_create (&t18, NULL, thread18, (void *)head);
 	pthread_create (&t19, NULL, thread19, (void *)head);
 	pthread_create (&t20, NULL, thread20, (void *)head);
+	pthread_create (&t21, NULL, thread21, (void *)head);
+	pthread_create (&t22, NULL, thread22, (void *)head);
+	pthread_create (&t23, NULL, thread23, (void *)head);
+	pthread_create (&t24, NULL, thread24, (void *)head);
+	pthread_create (&t25, NULL, thread25, (void *)head);
+	pthread_create (&t26, NULL, thread26, (void *)head);
+	pthread_create (&t27, NULL, thread27, (void *)head);
+	pthread_create (&t28, NULL, thread28, (void *)head);
+	pthread_create (&t29, NULL, thread29, (void *)head);
+	pthread_create (&t30, NULL, thread30, (void *)head);
 	pthread_join (t1, NULL);
 	pthread_join (t2, NULL);
 	pthread_join (t3, NULL);
@@ -156,6 +175,16 @@ int main(void)
 	pthread_join (t18, NULL);
 	pthread_join (t19, NULL);
 	pthread_join (t20, NULL);
+	pthread_join (t21, NULL);
+	pthread_join (t22, NULL);
+	pthread_join (t23, NULL);
+	pthread_join (t24, NULL);
+	pthread_join (t25, NULL);
+	pthread_join (t26, NULL);
+	pthread_join (t27, NULL);
+	pthread_join (t28, NULL);
+	pthread_join (t29, NULL);
+	pthread_join (t30, NULL);
 	SystemCounterState after_sstate = getSystemCounterState();
 	clock_t end = clock();
 	double time_s = (double)(end-begin)/ CLOCKS_PER_SEC;
@@ -335,8 +364,89 @@ void * thread19(void * args)
 void * thread20(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(145,head);
-	insert(155,head);
-	deleteElement(head,145);
+	insert(245,head);
+	insert(255,head);
+	deleteElement(head,245);
 	//deleteElement(head,0);
 }
+void * thread21(void * args)
+{
+	node_t * head = (node_t *)args;
+	insert(345,head);
+	insert(355,head);
+	deleteElement(head,345);
+	//deleteElement(head,0);
+}
+void * thread22(void * args)
+{
+	node_t * head = (node_t *)args;
+	insert(445,head);
+	insert(455,head);
+	deleteElement(head,445);
+	//deleteElement(head,0);
+}
+void * thread23(void * args)
+{
+	node_t * head = (node_t *)args;
+	insert(545,head);
+	insert(555,head);
+	deleteElement(head,545);
+	//deleteElement(head,0);
+}
+void * thread24(void * args)
+{
+	node_t * head = (node_t *)args;
+	insert(645,head);
+	insert(655,head);
+	deleteElement(head,645);
+	//deleteElement(head,0);
+}
+void * thread25(void * args)
+{
+	node_t * head = (node_t *)args;
+	insert(1145,head);
+	insert(1155,head);
+	deleteElement(head,1145);
+	//deleteElement(head,0);
+}
+void * thread26(void * args)
+{
+	node_t * head = (node_t *)args;
+	insert(2145,head);
+	insert(2155,head);
+	deleteElement(head,2145);
+	//deleteElement(head,0);
+}
+void * thread27(void * args)
+{
+	node_t * head = (node_t *)args;
+	insert(3145,head);
+	insert(3155,head);
+	deleteElement(head,3145);
+	//deleteElement(head,0);
+}
+void * thread28(void * args)
+{
+	node_t * head = (node_t *)args;
+	insert(4145,head);
+	insert(4155,head);
+	deleteElement(head,4145);
+	//deleteElement(head,0);
+}
+void * thread29(void * args)
+{
+	node_t * head = (node_t *)args;
+	insert(5145,head);
+	insert(5155,head);
+	deleteElement(head,5145);
+	//deleteElement(head,0);
+}
+void * thread30(void * args)
+{
+	node_t * head = (node_t *)args;
+	insert(6145,head);
+	insert(6155,head);
+	deleteElement(head,6145);
+	//deleteElement(head,0);
+}
+
