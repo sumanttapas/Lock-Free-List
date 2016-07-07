@@ -124,7 +124,7 @@ int main(void)
 	clock_t begin = clock();	
 	node_t * head = init_list();
 	SystemCounterState before_sstate = getSystemCounterState();
-	pthread_t t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20;
+	pthread_t t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20,t21,t22,t23,t24,t25,t26,t27,t28,t29,t30;
 	pthread_create (&t2, NULL, thread2, (void *)head);
 	pthread_create (&t1, NULL, thread1, (void *)head);
 	pthread_create (&t3, NULL, thread3, (void *)head);
