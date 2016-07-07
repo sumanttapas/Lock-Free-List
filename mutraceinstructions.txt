@@ -1,0 +1,5 @@
+To install: sudo apt-get install mutrace
+
+to use: compile using gcc -g -rdynamic -o mylock test.c -lpthread
+
+to run: mutrace ./mylock
