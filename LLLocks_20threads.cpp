@@ -127,7 +127,7 @@ int main(void)
 	}
 	clock_t begin = clock();	
 	node_t * head = init_list();
-
+	SystemCounterState before_sstate = getSystemCounterState();
 	pthread_t t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20;
 	pthread_create (&t2, NULL, thread2, (void *)head);
 	pthread_create (&t1, NULL, thread1, (void *)head);
@@ -149,16 +149,35 @@ int main(void)
 	pthread_create (&t18, NULL, thread18, (void *)head);
 	pthread_create (&t19, NULL, thread19, (void *)head);
 	pthread_create (&t20, NULL, thread20, (void *)head);
-	SystemCounterState before_sstate = getSystemCounterState();
 	pthread_join (t1, NULL);
 	pthread_join (t2, NULL);
 	pthread_join (t3, NULL);
 	pthread_join (t4, NULL);
 	pthread_join (t5, NULL);
 	pthread_join (t6, NULL);
+	pthread_join (t1, NULL);
+	pthread_join (t2, NULL);
+	pthread_join (t3, NULL);
+	pthread_join (t4, NULL);
+	pthread_join (t5, NULL);
+	pthread_join (t6, NULL);
+	pthread_join (t7, NULL);
+	pthread_join (t8, NULL);
+	pthread_join (t9, NULL);
+	pthread_join (t10, NULL);
+	pthread_join (t11, NULL);
+	pthread_join (t12, NULL);
+	pthread_join (t13, NULL);
+	pthread_join (t14, NULL);
+	pthread_join (t15, NULL);
+	pthread_join (t16, NULL);
+	pthread_join (t17, NULL);
+	pthread_join (t18, NULL);
+	pthread_join (t19, NULL);
+	pthread_join (t20, NULL);
+	SystemCounterState after_sstate = getSystemCounterState();
 	clock_t end = clock();
 	double time_s = (double)(end-begin)/ CLOCKS_PER_SEC;
-	SystemCounterState after_sstate = getSystemCounterState();
 
 	std::cout << "\nTime:" << time_s << std::endl;
 	std::cout << "\nInstructions per clock:" << getIPC(before_sstate,after_sstate) << std::endl;
