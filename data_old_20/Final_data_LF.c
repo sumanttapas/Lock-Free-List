@@ -1,0 +1,11 @@
+Average Time:0.00125751515152
+Average Bytes IPC:0.753048707071
+Average Bytes read:2371914.34343
+Average Bytes Written:4348372.68687
+Average L2 Misses:93312.5050505
+Average L3 Misses:86003.1717172
+Average L2 Hits:14147.3535354
+Average L3 Hits:7309.33333333
+Average Cycles:5791011.54545
+Average CL3M:3.04879559596
+Average CL2M:0.0693968321212
