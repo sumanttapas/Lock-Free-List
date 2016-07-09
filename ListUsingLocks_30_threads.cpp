@@ -1,9 +1,12 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <ctype.h>
+#ifdef PCM
 #include "cpucounters.h"
+#endif
 #include <time.h>
 
 
@@ -13,38 +16,37 @@ typedef struct node
 	struct node* next;
 }node_t;
 
-int c=0;
 
-void *thread1(void *);
-void *thread2(void *);
-void *thread3(void *);
-void *thread4(void *);
-void *thread5(void *);
-void *thread6(void *);
-void *thread7(void *);
-void *thread8(void *);
-void *thread9(void *);
-void *thread10(void *);
-void *thread11(void *);
-void *thread12(void *);
-void *thread13(void *);
-void *thread14(void *);
-void *thread15(void *);
-void *thread16(void *);
-void *thread17(void *);
-void *thread18(void *);
-void *thread19(void *);
-void *thread20(void *);
-void *thread21(void *);
-void *thread22(void *);
-void *thread23(void *);
-void *thread24(void *);
-void *thread25(void *);
-void *thread26(void *);
-void *thread27(void *);
-void *thread28(void *);
-void *thread29(void *);
-void *thread30(void *);
+void * thread1(void *);
+void * thread2(void *);
+void * thread3(void *);
+void * thread4(void *);
+void * thread5(void *);
+void * thread6(void *);
+void * thread7(void *);
+void * thread8(void *);
+void * thread9(void *);
+void * thread10(void *);
+void * thread11(void *);
+void * thread12(void *);
+void * thread13(void *);
+void * thread14(void *);
+void * thread15(void *);
+void * thread16(void *);
+void * thread17(void *);
+void * thread18(void *);
+void * thread19(void *);
+void * thread20(void *);
+void * thread21(void *);
+void * thread22(void *);
+void * thread23(void *);
+void * thread24(void *);
+void * thread25(void *);
+void * thread26(void *);
+void * thread27(void *);
+void * thread28(void *);
+void * thread29(void *);
+void * thread30(void *);
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 void insert(int data,node_t * head)
@@ -114,6 +116,7 @@ node_t *init_list()
 
 int main(void)
 {
+	#ifdef PCM	
 	PCM * m = PCM::getInstance();
 	PCM::ErrorCode returnResult = m->program();
 	if (returnResult != PCM::Success){
@@ -121,12 +124,16 @@ int main(void)
 	  std::cerr << "Error code: " << returnResult << std::endl;
 	  exit(1);
 	}
+	#endif
 	clock_t begin = clock();	
 	node_t * head = init_list();
+	#ifdef PCM
 	SystemCounterState before_sstate = getSystemCounterState();
-	pthread_t t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20,t21,t22,t23,t24,t25,t26,t27,t28,t29,t30;
-	pthread_create (&t2, NULL, thread2, (void *)head);
+	#endif
+	pthread_t t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26, t27, t28, t29, t30;
+
 	pthread_create (&t1, NULL, thread1, (void *)head);
+	pthread_create (&t2, NULL, thread2, (void *)head);
 	pthread_create (&t3, NULL, thread3, (void *)head);
 	pthread_create (&t4, NULL, thread4, (void *)head);
 	pthread_create (&t5, NULL, thread5, (void *)head);
@@ -185,10 +192,12 @@ int main(void)
 	pthread_join (t28, NULL);
 	pthread_join (t29, NULL);
 	pthread_join (t30, NULL);
+	#ifdef PCM	
 	SystemCounterState after_sstate = getSystemCounterState();
+	#endif
 	clock_t end = clock();
 	double time_s = (double)(end-begin)/ CLOCKS_PER_SEC;
-
+	#ifdef PCM
 	std::cout << "\nTime:" << time_s << std::endl;
 	std::cout << "\nInstructions per clock:" << getIPC(before_sstate,after_sstate) << std::endl;
 	std::cout << "Bytes read:" << getBytesReadFromMC(before_sstate,after_sstate) << std::endl;
@@ -201,252 +210,249 @@ int main(void)
 	std::cout << "Cycles:" << getCycles(before_sstate,after_sstate)<<std::endl;
 	std::cout << "Cycles Lost Due L3 Cache Misses:" << getCyclesLostDueL3CacheMisses(before_sstate,after_sstate)<<std::endl;
 	std::cout << "Cycles Lost Due L2 Cache Misses:" << getCyclesLostDueL2CacheMisses(before_sstate,after_sstate)<<std::endl;
+	#endif
 	printlist(head);
 	return 0;
 }
 
+
 void * thread1(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(12,head);
-	insert(14,head);
-	deleteElement(head,12);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
-
 void * thread2(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(16,head);
-	insert(18,head);
-	deleteElement(head,16);
-	//deleteElement(head,1);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
-
 void * thread3(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(10,head);
-	insert(8,head);
-	deleteElement(head,10);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread4(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(6,head);
-	insert(4,head);
-	deleteElement(head,6);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread5(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(2,head);
-	insert(0,head);
-	deleteElement(head,2);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread6(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(20,head);
-	insert(22,head);
-	deleteElement(head,20);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread7(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(120,head);
-	insert(122,head);
-	deleteElement(head,120);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
-
 void * thread8(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(201,head);
-	insert(221,head);
-	deleteElement(head,201);
-	//deleteElement(head,1);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
-
 void * thread9(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(9,head);
-	insert(19,head);
-	deleteElement(head,9);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread10(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(39,head);
-	insert(49,head);
-	deleteElement(head,39);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread11(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(69,head);
-	insert(79,head);
-	deleteElement(head,69);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread12(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(99,head);
-	insert(109,head);
-	deleteElement(head,99);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread13(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(129,head);
-	insert(139,head);
-	deleteElement(head,129);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread14(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(159,head);
-	insert(169,head);
-	deleteElement(head,159);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread15(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(189,head);
-	insert(199,head);
-	deleteElement(head,189);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread16(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(219,head);
-	insert(229,head);
-	deleteElement(head,219);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread17(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(200,head);
-	insert(190,head);
-	deleteElement(head,200);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread18(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(170,head);
-	insert(160,head);
-	deleteElement(head,170);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread19(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(140,head);
-	insert(130,head);
-	deleteElement(head,140);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread20(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(245,head);
-	insert(255,head);
-	deleteElement(head,245);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread21(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(345,head);
-	insert(355,head);
-	deleteElement(head,345);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread22(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(445,head);
-	insert(455,head);
-	deleteElement(head,445);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread23(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(545,head);
-	insert(555,head);
-	deleteElement(head,545);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread24(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(645,head);
-	insert(655,head);
-	deleteElement(head,645);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread25(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(1145,head);
-	insert(1155,head);
-	deleteElement(head,1145);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread26(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(2145,head);
-	insert(2155,head);
-	deleteElement(head,2145);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread27(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(3145,head);
-	insert(3155,head);
-	deleteElement(head,3145);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread28(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(4145,head);
-	insert(4155,head);
-	deleteElement(head,4145);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread29(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(5145,head);
-	insert(5155,head);
-	deleteElement(head,5145);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
 void * thread30(void * args)
 {
 	node_t * head = (node_t *)args;
-	insert(6145,head);
-	insert(6155,head);
-	deleteElement(head,6145);
-	//deleteElement(head,0);
+	int d = (rand())%1000;
+	insert(d,head);
+	insert(d+2,head);
+	deleteElement(head,d);
 }
-
