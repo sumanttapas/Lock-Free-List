@@ -30,7 +30,7 @@ struct list
 	void (*destructor)(node_lf *);
 };
 typedef struct list * List;
-typedef struct searchfrom
+typedef struct searchfrom 
 {
 	node_lf * current;
 	node_lf * next;
