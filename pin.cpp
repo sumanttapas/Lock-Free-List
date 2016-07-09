@@ -370,7 +370,7 @@ int main()
 	pthread_create (&t1, NULL, thread1, (void *)mylist);
 	pthread_create (&t3, NULL, thread3, (void *)mylist);
 	pthread_create (&t4, NULL, thread4, (void *)mylist);
-	/*pthread_create (&t5, NULL, thread5, (void *)mylist);
+	pthread_create (&t5, NULL, thread5, (void *)mylist);
 	pthread_create (&t6, NULL, thread6, (void *)mylist);
 	pthread_create (&t7, NULL, thread7, (void *)mylist);
 	pthread_create (&t8, NULL, thread8, (void *)mylist);
@@ -395,12 +395,12 @@ int main()
 	pthread_create (&t27, NULL, thread27, (void *)mylist);
 	pthread_create (&t28, NULL, thread28, (void *)mylist);
 	pthread_create (&t29, NULL, thread29, (void *)mylist);
-	pthread_create (&t30, NULL, thread30, (void *)mylist);*/
+	pthread_create (&t30, NULL, thread30, (void *)mylist);
 	pthread_join (t1, NULL);
 	pthread_join (t2, NULL);
 	pthread_join (t3, NULL);
 	pthread_join (t4, NULL);
-	/*pthread_join (t5, NULL);
+	pthread_join (t5, NULL);
 	pthread_join (t6, NULL);
 	pthread_join (t7, NULL);
 	pthread_join (t8, NULL);
@@ -425,7 +425,7 @@ int main()
 	pthread_join (t27, NULL);
 	pthread_join (t28, NULL);
 	pthread_join (t29, NULL);
-	pthread_join (t30, NULL);*/
+	pthread_join (t30, NULL);
 	SystemCounterState after_sstate = getSystemCounterState();
 	//mylist->print(mylist->head);
 	//mylist->destructor(mylist->head);
@@ -509,8 +509,13 @@ void * thread4(void * args)
 	//list->delete_node(26,list->head);
 	//insert(12,head);
 }
-/*void * thread5(void * args)
-{
+void * thread5(void * args)
+{	
+	cpu_set_t cpuset;
+	CPU_SET(0,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(2,list->head);
@@ -521,6 +526,11 @@ void * thread4(void * args)
 }
 void * thread6(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(2,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(20,list->head);
@@ -531,6 +541,11 @@ void * thread6(void * args)
 }
 void * thread7(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(3,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(120,list->head);
@@ -541,6 +556,11 @@ void * thread7(void * args)
 }
 void * thread8(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(4,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(201,list->head);
@@ -551,6 +571,11 @@ void * thread8(void * args)
 }
 void * thread9(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(0,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(9,list->head);
@@ -561,6 +586,11 @@ void * thread9(void * args)
 }
 void * thread10(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(2,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(39,list->head);
@@ -571,6 +601,11 @@ void * thread10(void * args)
 }
 void * thread11(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(3,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(69,list->head);
@@ -581,6 +616,11 @@ void * thread11(void * args)
 }
 void * thread12(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(4,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(99,list->head);
@@ -591,6 +631,11 @@ void * thread12(void * args)
 }
 void * thread13(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(0,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(129,list->head);
@@ -601,6 +646,11 @@ void * thread13(void * args)
 }
 void * thread14(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(2,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(159,list->head);
@@ -611,6 +661,11 @@ void * thread14(void * args)
 }
 void * thread15(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(3,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(189,list->head);
@@ -621,6 +676,11 @@ void * thread15(void * args)
 }
 void * thread16(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(4,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(219,list->head);
@@ -631,6 +691,11 @@ void * thread16(void * args)
 }
 void * thread17(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(0,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(200,list->head);
@@ -641,6 +706,11 @@ void * thread17(void * args)
 }
 void * thread18(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(2,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(170,list->head);
@@ -651,6 +721,11 @@ void * thread18(void * args)
 }
 void * thread19(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(3,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(140,list->head);
@@ -661,6 +736,11 @@ void * thread19(void * args)
 }
 void * thread20(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(4,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(145,list->head);
@@ -671,6 +751,11 @@ void * thread20(void * args)
 }
 void * thread21(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(0,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(165,list->head);
@@ -681,6 +766,11 @@ void * thread21(void * args)
 }
 void * thread22(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(2,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(185,list->head);
@@ -691,6 +781,11 @@ void * thread22(void * args)
 }
 void * thread23(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(3,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(1,list->head);
@@ -701,6 +796,11 @@ void * thread23(void * args)
 }
 void * thread24(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(4,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(13,list->head);
@@ -711,6 +811,11 @@ void * thread24(void * args)
 }
 void * thread25(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(0,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(17,list->head);
@@ -721,6 +826,11 @@ void * thread25(void * args)
 }
 void * thread26(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(2,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(21,list->head);
@@ -731,6 +841,11 @@ void * thread26(void * args)
 }
 void * thread27(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(3,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(27,list->head);
@@ -741,6 +856,11 @@ void * thread27(void * args)
 }
 void * thread28(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(4,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(31,list->head);
@@ -751,6 +871,11 @@ void * thread28(void * args)
 }
 void * thread29(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(0,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(35,list->head);
@@ -761,6 +886,11 @@ void * thread29(void * args)
 }
 void * thread30(void * args)
 {
+	cpu_set_t cpuset;
+	CPU_SET(2,&cpuset);
+	if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) <0) {
+	perror("pthread_setaffinity_np");
+	}
 	List list = (List)args;
 	//sleep(2);
 	list->insert(39,list->head);
@@ -768,4 +898,4 @@ void * thread30(void * args)
 	list->delete_node(39,list->head);
 	//list->delete_node(30,list->head);
 	//insert(12,head);
-}*/
+}
