@@ -1,0 +1,11 @@
+Median of L3 Misses=6157
+Median of L2 Misses=9123.5
+Median of L3 Hits=3023.5
+Median of L2 Hits=14161.5
+Median of Time=0.0006555
+Median of Cycles=4816044
+Median of IPC=0.9939305
+Median of CL3M=0.2410605
+Median of CL2M=0.0275034
+Median of Bytes Read=589248
+Median of Bytes Written=128448
