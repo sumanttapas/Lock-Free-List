@@ -25,9 +25,9 @@
 #define getNodeAddress(address) ((node_lf *)((uintptr_t)address & 0xFFFFFFFC))
 typedef struct node
 {
-	int data;
-	struct node * next;
+	int key;
 	struct node * backlink;
+	struct node * successor;
 }node_lf;
 
 struct list
